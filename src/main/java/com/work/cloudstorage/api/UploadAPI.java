@@ -26,10 +26,13 @@ public class UploadAPI {
     ) throws IOException {
         Path path = Path.of(String.format(FILE, username, filename));
 
-        if (!Files.exists(path)) Files.createFile(path);
+        if (!Files.exists(path)) {
+            log.info("File created: " + filename);
+            Files.createFile(path);
+        }
         Files.write(path, base64String, StandardOpenOption.APPEND);
 
-        log.info("File created: " + filename);
+        log.info(String.format("File '%s' writing: ", filename));
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
