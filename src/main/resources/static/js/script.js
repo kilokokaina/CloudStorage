@@ -3,6 +3,7 @@ const BUFFER_SIZE = 512 * 1024;
 function splitFile() {
     const file = document.getElementById('inputFile').files[0];
     const username = document.getElementById('username').value;
+    const progressBar = document.getElementById('progress-bar');
     const requestURL = `/upload/partial?username=${username}&filename=${file.name}`
 
     let reader = new FileReader();
@@ -17,14 +18,15 @@ function splitFile() {
                 method: 'POST',
                 body: reader.result
             }).then((response) => {
-                console.log(response.status);
                 if (response.status === 202) {
-                    console.log(`Chunk size = ${offset}, chunk count = ${counter}`);
+                    let percent = (counter / chunkCount) * 100;
+                    progressBar.setAttribute('style', `width: ${percent}%`);
                     readNext();
                 } else {
                     alert('Ошибка. Повторите попытку позже');
                     offset -= BUFFER_SIZE;
                     uploadAttempt++;
+                    counter--;
 
                     readNext();
                 }

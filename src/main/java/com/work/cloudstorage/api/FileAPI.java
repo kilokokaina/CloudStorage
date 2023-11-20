@@ -35,7 +35,7 @@ public class FileAPI {
         Files.write(path, base64String, StandardOpenOption.APPEND);
         log.info(String.format("File '%s' writing", filename));
 
-        ERROR_TEST++;
+//        ERROR_TEST++;
 
         HttpStatus httpStatus = (ERROR_TEST  == 3) ?
                 HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.ACCEPTED;
