@@ -9,33 +9,37 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.Normalizer;
 
 @Slf4j
 @RestController
 public class FileAPI {
 
+    private SoftReference<Path> pathRef = new SoftReference<>(null);
     private @Value("${storage.path}") String FILE;
+
     private static int ERROR_TEST = 0;
 
     @PostMapping("upload/partial")
     public ResponseEntity<HttpStatus> upload(
             @RequestParam(name = "username") String username,
             @RequestParam(name = "filename") String filename,
-            @RequestBody byte[] base64String
-    ) throws IOException {
-        Path path = Path.of(String.format(FILE, username, filename));
+            @RequestBody byte[] byteArray) throws IOException {
 
-        if (!Files.exists(path)) {
-            log.info("File created: " + filename);
-            Files.createFile(path);
+        filename = Normalizer.normalize(filename, Normalizer.Form.NFC);
+        Path path = pathRef.get();
+
+        if (path == null || !path.toString().equals(String.format(FILE, username, filename))) {
+            path = Path.of(String.format(FILE, username, filename));
+            pathRef = new SoftReference<>(path);
         }
-        Files.write(path, base64String, StandardOpenOption.APPEND);
-        log.info(String.format("File '%s' writing", filename));
 
-//        ERROR_TEST++;
+        if (!Files.exists(path)) Files.createFile(path);
+        Files.write(path, byteArray, StandardOpenOption.APPEND);
 
         HttpStatus httpStatus = (ERROR_TEST  == 3) ?
                 HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.ACCEPTED;
