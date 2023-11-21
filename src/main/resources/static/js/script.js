@@ -31,7 +31,11 @@ function splitFile() {
                     readNext();
                 }
             });
-        } else alert('Файл загружен');
+        } else {
+            let end = Date.now();
+            console.log(`Время выполнения: ${end - start}мс`);
+            alert(`Файл загружен. Время выполнения: ${end - start}мс`);
+        }
     };
 
     function readNext() {
@@ -40,5 +44,6 @@ function splitFile() {
         counter++;
     }
 
+    let start = Date.now();
     readNext();
 }
