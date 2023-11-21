@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -51,15 +52,19 @@ public class FileIOServiceImpl implements FileIOService {
     }
 
     @Override
-    public ResponseEntity<FileSystemResource> download(String username, String filename) {
+    public ResponseEntity<FileSystemResource> download(String username, String filename) throws IOException {
         String fileExtension = filename.split("\\.")[filename.split("\\.").length - 1];
         String fileURI = String.format(FILE, username, filename);
         String headerValue = "attachment; filename=download.%s";
+
+        String[] contentType = Files.probeContentType(Path.of(fileURI)).split("/");
+        MediaType mediaType = new MediaType(contentType[0], contentType[1]);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, String.format(headerValue, fileExtension));
 
         return ResponseEntity.ok()
+                .contentType(mediaType)
                 .headers(httpHeaders)
                 .body(new FileSystemResource(fileURI));
     }
