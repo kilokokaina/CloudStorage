@@ -64,10 +64,10 @@ public class FileIOServiceImpl implements FileIOService {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, String.format(headerValue, fileExtension));
+        httpHeaders.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.toFile().length()));
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, String.valueOf(mediaType));
 
         return ResponseEntity.ok()
-                .contentType(mediaType)
-                .contentLength(file.toFile().length())
                 .headers(httpHeaders)
                 .body(new FileSystemResource(fileURI));
     }
