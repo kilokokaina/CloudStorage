@@ -31,6 +31,7 @@ public class FileIOServiceImpl implements FileIOService {
     @Override
     public CompletableFuture<ResponseEntity<HttpStatus>> upload(String username, String filename, byte[] byteArray) throws IOException {
         filename = Normalizer.normalize(filename, Normalizer.Form.NFC);
+        filename = filename.replace(" ", "_");
         Path path = pathRef.get();
 
         if (path == null || !path.toString().equals(String.format(FILE, username, filename))) {
@@ -51,12 +52,12 @@ public class FileIOServiceImpl implements FileIOService {
 
     @Override
     public ResponseEntity<FileSystemResource> download(String username, String filename) {
+        String fileExtension = filename.split("\\.")[filename.split("\\.").length - 1];
         String fileURI = String.format(FILE, username, filename);
-        String headerValue = "attachment; filename=%s";
+        String headerValue = "attachment; filename=download.%s";
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION,
-                String.format(headerValue, filename));
+        httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, String.format(headerValue, fileExtension));
 
         return ResponseEntity.ok()
                 .headers(httpHeaders)
