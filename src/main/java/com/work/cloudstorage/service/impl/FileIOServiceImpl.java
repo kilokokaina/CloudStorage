@@ -57,7 +57,9 @@ public class FileIOServiceImpl implements FileIOService {
         String fileURI = String.format(FILE, username, filename);
         String headerValue = "attachment; filename=download.%s";
 
-        String[] contentType = Files.probeContentType(Path.of(fileURI)).split("/");
+        Path file = Path.of(fileURI);
+
+        String[] contentType = Files.probeContentType(file).split("/");
         MediaType mediaType = new MediaType(contentType[0], contentType[1]);
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -65,8 +67,8 @@ public class FileIOServiceImpl implements FileIOService {
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
+                .contentLength(file.toFile().length())
                 .headers(httpHeaders)
                 .body(new FileSystemResource(fileURI));
     }
-
 }
