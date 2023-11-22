@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -53,9 +54,11 @@ public class FileIOServiceImpl implements FileIOService {
 
     @Override
     public ResponseEntity<FileSystemResource> download(String username, String filename) throws IOException {
-        String fileExtension = filename.split("\\.")[filename.split("\\.").length - 1];
+        filename = Normalizer.normalize(filename, Normalizer.Form.NFC);
+        filename = filename.replace(" ", "_");
+
         String fileURI = String.format(FILE, username, filename);
-        String headerValue = "attachment; filename=download.%s";
+        String headerValue = "attachment; filename=\"%s\"";
 
         Path file = Path.of(fileURI);
 
@@ -63,7 +66,8 @@ public class FileIOServiceImpl implements FileIOService {
         MediaType mediaType = new MediaType(contentType[0], contentType[1]);
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, String.format(headerValue, fileExtension));
+        httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, String.format(headerValue,
+                new String(filename.getBytes(StandardCharsets.US_ASCII))));
         httpHeaders.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.toFile().length()));
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, String.valueOf(mediaType));
 
@@ -71,4 +75,5 @@ public class FileIOServiceImpl implements FileIOService {
                 .headers(httpHeaders)
                 .body(new FileSystemResource(fileURI));
     }
+
 }
