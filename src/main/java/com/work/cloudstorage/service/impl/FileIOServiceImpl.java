@@ -2,6 +2,7 @@ package com.work.cloudstorage.service.impl;
 
 import com.work.cloudstorage.service.FileIOService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -23,13 +23,20 @@ import java.text.Normalizer;
 public class FileIOServiceImpl implements FileIOService {
 
     private SoftReference<Path> pathRef = new SoftReference<>(null);
+    private final TranslitService translitService;
     private @Value("${storage.path}") String FILE;
+
+    @Autowired
+    public FileIOServiceImpl(TranslitService translitService) {
+        this.translitService = translitService;
+    }
 
     @Async
     @Override
     public  void upload(String username, String filename, byte[] byteArray) throws IOException {
         filename = Normalizer.normalize(filename, Normalizer.Form.NFC);
         filename = filename.replace(" ", "_");
+
         Path path = pathRef.get();
 
         if (path == null || !path.toString().equals(String.format(FILE, username, filename))) {
@@ -58,7 +65,7 @@ public class FileIOServiceImpl implements FileIOService {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, String.format(headerValue,
-                new String(filename.getBytes(StandardCharsets.US_ASCII))));
+                translitService.translitCyrillic(filename)));
         httpHeaders.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.toFile().length()));
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, String.valueOf(mediaType));
 

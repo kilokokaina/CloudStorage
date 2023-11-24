@@ -29,8 +29,7 @@ public class FileAPI {
     }
 
     @GetMapping("download")
-    public ResponseEntity<FileSystemResource> download(
-            @RequestParam(value = "username") String username,
+    public ResponseEntity<FileSystemResource> download(@RequestParam(value = "username") String username,
             @RequestParam(value = "filename") String filename) throws IOException {
         return fileIOService.download(username, filename);
     }
