@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RestController
@@ -24,12 +22,10 @@ public class FileAPI {
     }
 
     @PostMapping("upload/partial")
-    public ResponseEntity<HttpStatus> upload(
-            @RequestParam(name = "username") String username,
-            @RequestParam(name = "filename") String filename,
-            @RequestBody byte[] byteArray) throws IOException, ExecutionException, InterruptedException {
-        CompletableFuture<ResponseEntity<HttpStatus>> resultStatus = fileIOService.upload(username, filename, byteArray);
-        return resultStatus.get();
+    @ResponseStatus(value = HttpStatus.ACCEPTED)
+    public void upload(@RequestParam(name = "username") String username,
+            @RequestParam(name = "filename") String filename, @RequestBody byte[] byteArray) throws IOException {
+        fileIOService.upload(username, filename, byteArray);
     }
 
     @GetMapping("download")

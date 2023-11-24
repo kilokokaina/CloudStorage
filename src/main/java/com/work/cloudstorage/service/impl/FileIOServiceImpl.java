@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -18,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.Normalizer;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -27,11 +25,9 @@ public class FileIOServiceImpl implements FileIOService {
     private SoftReference<Path> pathRef = new SoftReference<>(null);
     private @Value("${storage.path}") String FILE;
 
-    private static int ERROR_TEST = 0;
-
     @Async
     @Override
-    public CompletableFuture<ResponseEntity<HttpStatus>> upload(String username, String filename, byte[] byteArray) throws IOException {
+    public  void upload(String username, String filename, byte[] byteArray) throws IOException {
         filename = Normalizer.normalize(filename, Normalizer.Form.NFC);
         filename = filename.replace(" ", "_");
         Path path = pathRef.get();
@@ -45,11 +41,6 @@ public class FileIOServiceImpl implements FileIOService {
         Files.write(path, byteArray, StandardOpenOption.APPEND);
 
         log.info("Writing in file: " + filename);
-
-        HttpStatus httpStatus = (ERROR_TEST  == 3) ?
-                HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.ACCEPTED;
-
-        return CompletableFuture.completedFuture(ResponseEntity.status(httpStatus).build());
     }
 
     @Override
