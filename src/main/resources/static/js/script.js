@@ -4,7 +4,7 @@ function splitFile() {
     const file = document.getElementById('inputFile').files[0];
     const username = document.getElementById('username').value;
     const progressBar = document.getElementById('progress-bar');
-    const requestURL = `/upload/partial?username=${username}&filename=${file.name}`
+    const requestURL = `/api/upload/partial?username=${username}&filename=${file.name}`
 
     let reader = new FileReader();
     let uploadAttempt = 0, counter = 0, offset = 0;
@@ -46,4 +46,31 @@ function splitFile() {
 
     let start = Date.now();
     readNext();
+}
+
+function tree(filepath) {
+    const username = document.getElementById('username').value;
+    const treeTable = document.getElementById('tree-table');
+    const requestURL = `/api/tree?username=${username}&filepath=${filepath}`;
+    treeTable.innerHTML = '';
+
+    fetch(requestURL, {
+        method: 'GET',
+    }).then(async (response) => {
+        const result = await response.json();
+        for (let i = 0; i < result.length; i++) {
+            let row = treeTable.insertRow();
+            row.setAttribute('onclick', `tree('${result[i].fileName}')`);
+
+            let iconCell = row.insertCell(0);
+            let hrefCell = row.insertCell(1);
+            let smthCell = row.insertCell(2);
+
+            iconCell.innerHTML = (result[i].fileType === 'FILE') ? 'file' : 'dir';
+            hrefCell.innerHTML = result[i].fileName;
+            smthCell.innerHTML = 'Что-то';
+
+            console.log(result[i].filePath);
+        }
+    });
 }

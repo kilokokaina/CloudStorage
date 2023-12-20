@@ -1,22 +1,29 @@
 package com.work.cloudstorage.service.impl;
 
+import com.work.cloudstorage.pojo.FileJson;
+import com.work.cloudstorage.pojo.FileType;
 import com.work.cloudstorage.service.FileIOService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -33,11 +40,12 @@ public class FileIOServiceImpl implements FileIOService {
 
     @Async
     @Override
-    public  void upload(String username, String filename, byte[] byteArray) throws IOException {
+    public CompletableFuture<HttpStatus> upload(String username, String filename, byte[] byteArray)
+            throws IOException {
+        Path path = pathRef.get();
+
         filename = Normalizer.normalize(filename, Normalizer.Form.NFC);
         filename = filename.replace(" ", "_");
-
-        Path path = pathRef.get();
 
         if (path == null || !path.toString().equals(String.format(FILE, username, filename))) {
             path = Path.of(String.format(FILE, username, filename));
@@ -48,6 +56,8 @@ public class FileIOServiceImpl implements FileIOService {
         Files.write(path, byteArray, StandardOpenOption.APPEND);
 
         log.info("Writing in file: " + filename);
+
+        return CompletableFuture.completedFuture(HttpStatus.ACCEPTED);
     }
 
     @Override
@@ -74,4 +84,24 @@ public class FileIOServiceImpl implements FileIOService {
                 .body(new FileSystemResource(fileURI));
     }
 
+    @Override
+    public List<FileJson> tree(String username, String filepath) {
+        File[] files = new File(String.format(FILE, username, filepath)).listFiles();
+        List<FileJson> result = new ArrayList<>();
+
+        assert files != null;
+        for (File file : files) {
+            if (!file.isHidden()) {
+                result.add(new FileJson(
+                        (file.isDirectory()) ? FileType.DIR : FileType.FILE,
+                        file.getAbsolutePath(),
+                        file.getName()
+                ));
+            }
+        }
+
+        return result;
+    }
+
 }
+
