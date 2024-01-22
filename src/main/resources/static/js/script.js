@@ -2,9 +2,8 @@ const BUFFER_SIZE = 512 * 1024;
 
 function splitFile() {
     const file = document.getElementById('inputFile').files[0];
-    const username = document.getElementById('username').value;
     const progressBar = document.getElementById('progress-bar');
-    const requestURL = `/api/upload/partial?username=${username}&filename=${file.name}`
+    const requestURL = `/api/file/upload/partial?filename=${file.name}`
 
     let reader = new FileReader();
     let uploadAttempt = 0, counter = 0, offset = 0;
@@ -49,9 +48,8 @@ function splitFile() {
 }
 
 function tree(filepath) {
-    const username = document.getElementById('username').value;
     const treeTable = document.getElementById('tree-table');
-    const requestURL = `/api/tree?username=${username}&filepath=${filepath}`;
+    const requestURL = `/api/file/tree?filepath=${filepath}`;
     treeTable.innerHTML = '';
 
     fetch(requestURL, {

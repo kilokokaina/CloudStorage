@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-    <html lang="en">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +11,6 @@
     <body onload="tree('/')">
         <div class="container">
             <h3>Upload file</h3>
-            <input type="text" class="form-control mb-2" id="username" placeholder="Username:">
             <div class="input-group mb-3">
                 <input type="file" class="form-control mb" id="inputFile" name="inputFile">
                 <input type="button" class="btn btn-primary" value="Загрузить" onclick="splitFile()">

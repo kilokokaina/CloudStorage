@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -16,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "api")
+@RequestMapping(value = "api/file")
 public class FileAPI {
 
     private final FileIOService fileIOService;
@@ -27,23 +28,23 @@ public class FileAPI {
     }
 
     @RequestMapping(value = "upload/partial", method = RequestMethod.POST)
-    public ResponseEntity<HttpStatus> upload(@RequestParam(name = "username") String username,
+    public ResponseEntity<HttpStatus> upload(Authentication authentication,
                              @RequestParam(name = "filename") String filename, @RequestBody byte[] byteArray)
             throws IOException, ExecutionException, InterruptedException {
-        HttpStatus result = fileIOService.upload(username, filename, byteArray).get();
+        HttpStatus result = fileIOService.upload(authentication.getName(), filename, byteArray).get();
         return ResponseEntity.status(result).build();
     }
 
     @RequestMapping(value = "download", method = RequestMethod.GET)
-    public ResponseEntity<FileSystemResource> download(@RequestParam(value = "username") String username,
+    public ResponseEntity<FileSystemResource> download(Authentication authentication,
             @RequestParam(value = "filename") String filename) throws IOException {
-        return fileIOService.download(username, filename);
+        return fileIOService.download(authentication.getName(), filename);
     }
 
     @RequestMapping(value = "tree", method = RequestMethod.GET)
-    public ResponseEntity<List<FileJson>> tree(@RequestParam(value = "username") String username,
+    public ResponseEntity<List<FileJson>> tree(Authentication authentication,
             @RequestParam(value = "filepath") String filepath) {
-        return ResponseEntity.ok(fileIOService.tree(username, filepath));
+        return ResponseEntity.ok(fileIOService.tree(authentication.getName(), filepath));
     }
 
 }
