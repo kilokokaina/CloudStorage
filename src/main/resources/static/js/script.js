@@ -49,6 +49,8 @@ function splitFile() {
 
 function tree(filepath) {
     const treeTable = document.getElementById('tree-table');
+
+    if (filepath === undefined) filepath = "/";
     const requestURL = `/api/file/tree?filepath=${filepath}`;
     treeTable.innerHTML = '';
 
@@ -56,17 +58,23 @@ function tree(filepath) {
         method: 'GET',
     }).then(async (response) => {
         const result = await response.json();
+        document.getElementById('file_path').innerHTML = filepath;
         for (let i = 0; i < result.length; i++) {
             let row = treeTable.insertRow();
-            row.setAttribute('onclick', `tree('${result[i].fileName}')`);
 
             let iconCell = row.insertCell(0);
             let hrefCell = row.insertCell(1);
             let smthCell = row.insertCell(2);
 
+            if (result[i].fileType === 'FILE') {
+                row.setAttribute('onclick', `location.href='/api/file/download?filename=${result[i].fileName}'`);
+            } else {
+                row.setAttribute('onclick', `tree('${result[i].filePath}')`);
+            }
+
             iconCell.innerHTML = (result[i].fileType === 'FILE') ? 'file' : 'dir';
             hrefCell.innerHTML = result[i].fileName;
-            smthCell.innerHTML = 'Что-то';
+            smthCell.innerHTML = result[i].fileSize + 'B';
 
             console.log(result[i].filePath);
         }

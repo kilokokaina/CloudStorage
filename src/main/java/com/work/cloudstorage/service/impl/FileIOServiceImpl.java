@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -94,8 +95,9 @@ public class FileIOServiceImpl implements FileIOService {
             if (!file.isHidden()) {
                 result.add(new FileJson(
                         (file.isDirectory()) ? FileType.DIR : FileType.FILE,
-                        file.getAbsolutePath(),
-                        file.getName()
+                        file.getAbsolutePath().split(username)[1],
+                        file.getName(),
+                        file.length()
                 ));
             }
         }
