@@ -1,9 +1,10 @@
 const BUFFER_SIZE = 512 * 1024;
+let FILE_PATH = "/";
 
 function splitFile() {
     const file = document.getElementById('inputFile').files[0];
     const progressBar = document.getElementById('progress-bar');
-    const requestURL = `/api/file/upload/partial?filename=${file.name}`
+    const requestURL = `/api/file/upload/partial?filename=${FILE_PATH}/${file.name}`
 
     let reader = new FileReader();
     let uploadAttempt = 0, counter = 0, offset = 0;
@@ -58,7 +59,7 @@ function tree(filepath) {
         method: 'GET',
     }).then(async (response) => {
         const result = await response.json();
-        document.getElementById('file_path').innerHTML = filepath;
+        FILE_PATH = filepath;
         for (let i = 0; i < result.length; i++) {
             let row = treeTable.insertRow();
 
@@ -79,4 +80,11 @@ function tree(filepath) {
             console.log(result[i].filePath);
         }
     });
+}
+
+function back() {
+    let filePath = "";
+    let filePathSplit = FILE_PATH.split("/").slice(1, -1);
+    filePathSplit.forEach(part => filePath += `/${part}`);
+    tree(filePath);
 }

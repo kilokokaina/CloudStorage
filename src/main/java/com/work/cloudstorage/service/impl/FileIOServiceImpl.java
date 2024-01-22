@@ -53,6 +53,8 @@ public class FileIOServiceImpl implements FileIOService {
             pathRef = new SoftReference<>(path);
         }
 
+        log.info(path.toString());
+
         if (!Files.exists(path)) Files.createFile(path);
         Files.write(path, byteArray, StandardOpenOption.APPEND);
 
